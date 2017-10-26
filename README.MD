@@ -15,5 +15,3 @@ Expects 1 parameter: domain,subdomain or ip.
 specify nameserver on Line 26 (Defaults is 8.8.8.8)
 
 dnsrecon toggle in config on Line 27
-
-Expects 1 parameter, domain or subdomain. dnsrecon toggle in config on Line 19
