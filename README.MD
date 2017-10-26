@@ -1,13 +1,17 @@
-#VTSTech-1CMD v0.0.4-r17
-#Written by Veritas (veritas@vts-tech.org)
-#Homepage: www.VTS-Tech.org
-
-#Missing required tools? Try this: apt-get install dnsrecon nmap wget wpscan sslscan urlscan
+# Program: VTSTech-1CMD.sh
+# Version: 0.0.4-r18
+# Operating System: Kali Linux
+# Description: Bash script to run dnsrecon, nmap, sslscan, wpscan and then wget on index and urlscan on result. Output saved per tool/target.
+# Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
+# GitHub: https://github.com/Veritas83
+# Homepage: www.VTS-Tech.org
+# Dependencies: dnsrecon, nmap, sslscan, wpscan, urlscan, wget
+# apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 VTSTech-1CMD
 
-Runs dnsrecon, nmap, sslscan, wpscan and then wget on index and urlscan on result.
+Expects 1 parameter: domain,subdomain or ip.
 
-Saves each into its own file.
+specify nameserver on Line 26 (Defaults is 8.8.8.8)
 
-Expects 1 parameter, domain or subdomain. dnsrecon toggle in config on Line 19
+dnsrecon toggle in config on Line 27
