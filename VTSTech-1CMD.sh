@@ -24,8 +24,8 @@ fi
 #Missing required tools? Try this: apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 list=/usr/share/dnsrecon/namelist.txt #You might want to change this
 ns=8.8.8.8 #set nameserver here, other popular options: 8.8.4.4 (Google DNS), 208.67.222.222 (OpenDNS), 208.67.220.220 (OpenDNS)
-dns=0 #set to 0 to skip dnsrecon
-dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z --threads 1 --lifetime 10 -d $target > dnsrecon-$target.txt"
+dns=1 #set to 0 to skip dnsrecon
+dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --threads 1 --lifetime 10 -d $target > dnsrecon-$target.txt"
 nmapcmd="nmap -sSUV -T3 -O -A -vv -n -oN nmap-$target.txt -Pn -F --fuzzy --osscan-guess --reason --script banner,ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,http-dlink-backdoor,http-headers,http-internal-ip-disclosure,http-robots.txt,http-shellshock,ms-sql-info,mysql-info,nbstat,ntp-info,realvnc-auth-bypass,resolveall,smb-os-discovery,smb-system-info,ssl-heartbleed,upnp-info,vnc-info --script-args http-shellshock.cmd=ls,newtargets,resolveall.hosts=$target,vulns.showall=2 --version-intensity 4 $target"
 sslcmd="sslscan --verbose --no-colour --show-certificate $target > sslscan-$target.txt"
 wpcmd="wpscan -e up -t 1 -v --no-color --batch --url $target > wpscan-$target.txt"
