@@ -56,7 +56,7 @@ if [ $dns -eq 1 ]
 then
 	echo -en "Running dnsrecon.\nOutput: dnsrecon-$target.txt\n"
 	echo -e "cmdline: $dnscmd\n"
-	dnsrecon -t std,srv,goo,zonewalk,brt -D $list -g -z --threads 1 --lifetime 10 -d $target > dnsrecon-$target.txt
+	dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --threads 1 --lifetime 10 -d $target > dnsrecon-$target.txt
 	echo -en "dnsrecon complete.\n\nRunning nmap (w\ Shellshock+Heartbleed+ProFTP,VSFTP,DLink,RealVNC Backdoors. MySQL/MSSQL/UPnP/SMB/NTP/VNC Info).\nOutput: $HOME/Scans/nmap-$target.txt\n"
 	1cmd
 else
