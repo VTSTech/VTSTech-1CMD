@@ -1,7 +1,7 @@
 <img src="https://i.gyazo.com/f17798fc02b3d14af9a3c60a3a10f7d1.png">
 
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.4-r18
+# Version: 0.0.4-r19
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan and then wget on index and urlscan on result. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
