@@ -1,7 +1,7 @@
 <img src="https://i.gyazo.com/f17798fc02b3d14af9a3c60a3a10f7d1.png">
 
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.4-r19
+# Version: 0.0.4-r20
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan and then wget on index and urlscan on result. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -12,8 +12,13 @@
 
 VTSTech-1CMD
 
-Expects 1 parameter: domain,subdomain or ip.
+Expects at lest 1 parameter: domain,subdomain or ip.
 
-specify nameserver on Line 26 (Defaults is 8.8.8.8)
+Optional Parameters:
 
-dnsrecon toggle in config on Line 27
+-d skip dnsrecon
+-n skip nmap
+
+specify nameserver on Line 25 (Default is 8.8.8.8)
+
+nmap & dnsrecon hardcoded toggle in config on Line 26/27 (default is on)
