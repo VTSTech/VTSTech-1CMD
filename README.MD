@@ -17,6 +17,7 @@ Expects at lest 1 parameter: domain,subdomain or ip.
 Optional Parameters:
 
 -d skip dnsrecon
+
 -n skip nmap
 
 specify nameserver on Line 25 (Default is 8.8.8.8)
