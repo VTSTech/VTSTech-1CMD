@@ -1,6 +1,6 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.4 Revision 21
+# Version: 0.0.4 Revision 22
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -10,7 +10,7 @@
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 
-v=0.0.4-r21
+v=0.0.4-r22
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -76,19 +76,20 @@ else
   fi
 fi
 
-dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --threads 2 --lifetime 10 --xml dnsrecon-$target.xml -d $target"
-nmapcmd="nmap -sSUV -T4 -O -A -vv -n -oX nmap-$target.xml -Pn -F --fuzzy --osscan-guess --reason --script banner,ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,http-dlink-backdoor,http-headers,http-internal-ip-disclosure,http-robots.txt,http-shellshock,ms-sql-info,mysql-info,nbstat,ntp-info,realvnc-auth-bypass,resolveall,smb-os-discovery,smb-system-info,ssl-heartbleed,upnp-info,vnc-info --script-args http-shellshock.cmd=ls,newtargets,resolveall.hosts=$target,vulns.showall=2 --version-intensity 4 $target"
-sslcmd="sslscan --verbose --no-colour --show-certificate --xml=sslscan-$target.xml $target"
-wpcmd="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --url $target > wpscan-$target.txt"
-wpcmd2="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --url https://$target > wpscan-https.$target.txt"
-wgetcmd="wget -t 4 --content-on-error http://$target/ -O wget-$target.txt"
-urlcmd="urlscan -c -n wget-$target.txt > urlscan-$target.txt"
+dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
+nmapcmd="nmap -sS -sU -sV -T4 -O -A -v -v -F -n -oX /root/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason --script banner,ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,http-dlink-backdoor,http-favicon,http-git,http-headers,http-internal-ip-disclosure,http-php-version,http-robots.txt,http-shellshock,http-svn-info,http-useragent-tester,http-waf-fingerprint,imap-ntlm-info,jdwp-info,jdwp-version,ms-sql-info,ms-sql-ntlm-info,mysql-info,nbstat,ndmp-fs-info,ndmp-version,ntp-info,realvnc-auth-bypass,resolveall,rpcinfo,smb-os-discovery,smb-system-info,snmp-info,sshv1,ssl-heartbleed,telnet-ntlm-info,upnp-info,vnc-info,xmpp-info --script-args http-shellshock.cmd=ls,newtargets,resolveall.hosts=$target,vulns.showall=2 --version-intensity 4 $target"
+sslcmd="sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
+wpcmd="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-$target.txt --url $target"
+wpcmd2="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-https.$target.txt --url https://$target"
+wgetcmd="wget -t 4 --content-on-error http://$target/ -O $HOME/Scans/wget-$target.txt"
+urlcmd="urlscan -c -n wget-$target.txt > $HOME/Scans/urlscan-$target.txt"
 
 
 function 1cmd {
+  mkdir $HOME/Scans;
   if [ $dns -eq 1 ]
   then
-    echo -en "[+] Running dnsrecon.\nOutput: dnsrecon-$target.xml\n\n";
+    echo -en "[+] Running dnsrecon.\nOutput: $HOME/Scans/dnsrecon-$target.xml\n\n";
     echo -e  "[+] cmdline: $dnscmd\n\n";
     $dnscmd
   fi
@@ -109,7 +110,7 @@ function 1cmd {
   fi
   if [ $ssl -eq 1 ]
   then
-		echo -en "[+] Running sslscan.\nOutput: sslscan-$target.xml\n\n";
+		echo -en "[+] Running sslscan.\nOutput: $HOME/Scans/sslscan-$target.xml\n\n";
   	echo -e  "[+] cmdline: $sslcmd\n\n";
   	$sslcmd
   	echo -en "[+] sslscan complete.\n\n";
@@ -120,11 +121,11 @@ function 1cmd {
   fi
   if [ $wp -eq 1 ]
   then
-		echo -en "[+] Running wpscan.\nOutput: wpscan-$target.txt & wpscan-https.$target.txt\n";
+		echo -en "[+] Running wpscan.\nOutput: $HOME/Scans/wpscan-$target.txt & wpscan-https.$target.txt\n";
 	  echo -e "[+] cmdline: $wpcmd\n\n";
-	  wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --url $target > wpscan-$target.txt
+    $wpcmd
 	  echo -e "[+] cmdline: $wpcmd2\n\n";
-	  wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --url https://$target > wpscan-https.$target.txt
+	  $wpcmd2
 	  echo -e "[+] wpscan complete.\n\n";
 	fi
   if [ $wp -eq 0 ]
@@ -133,7 +134,7 @@ function 1cmd {
   fi
   if [ $wg -eq 1 ]
   then
-	echo -en "[+] Running wget. Output: wget-$target.txt\n\n";
+	echo -en "[+] Running wget. Output: $HOME/Scans/wget-$target.txt\n\n";
   echo -e "[+] cmdline: $wgetcmd\n\n";
   $wgetcmd
   echo -e "[+] wget complete.\n\n";
@@ -144,7 +145,7 @@ function 1cmd {
   fi
   if [ $url -eq 1 ]
   then
-	echo -en "Running urlscan. Output: urlscan-$target.txt\n\n";
+	echo -en "Running urlscan. Output: $HOME/Scans/urlscan-$target.txt\n\n";
   echo -e "[+] cmdline: $urlcmd\n\n";
   urlscan -c -n wget-$target.txt > urlscan-$target.txt
 	fi
