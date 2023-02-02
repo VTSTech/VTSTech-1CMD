@@ -1,6 +1,6 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.4 Revision 23
+# Version: 0.0.4 Revision 24
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -10,7 +10,7 @@
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 
-v=0.0.4-r23
+v=0.0.4-r24
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -82,7 +82,7 @@ sslcmd="sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslsc
 wpcmd="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-$target.txt --url $target"
 wpcmd2="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-https.$target.txt --url https://$target"
 wgetcmd="wget -t 4 --content-on-error http://$target/ -O $HOME/Scans/wget-$target.txt"
-urlcmd="urlscan -c -n $HOME/Scans/wget-$target.txt > $HOME/Scans/urlscan-$target.txt"
+urlcmd="urlscan -c -n $HOME/Scans/wget-$target.txt"
 
 
 function 1cmd {
@@ -147,7 +147,7 @@ function 1cmd {
   then
 	echo -en "Running urlscan. Output: $HOME/Scans/urlscan-$target.txt\n\n";
   echo -e "[+] cmdline: $urlcmd\n\n";
-  urlscan -c -n wget-$target.txt > urlscan-$target.txt
+  $urlcmd > $HOME/Scans/urlscan-$target.txt
 	fi
   if [ $url -eq 0 ]
   then
