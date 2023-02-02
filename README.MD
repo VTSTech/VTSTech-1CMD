@@ -1,4 +1,4 @@
-<img src="https://i.gyazo.com/e9fdf08cfe1249bb7ccc6c319552732b.png">
+<img src="https://i.imgur.com/NytAOZq.png">
 <pre>
 # Program: VTSTech-1CMD.sh
 # Version: 0.0.4-r25
