@@ -1,6 +1,6 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.4 Revision 25
+# Version: 0.0.4 Revision 26
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -10,7 +10,7 @@
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 
-v=0.0.4-r25
+v=0.0.4-r26
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -77,7 +77,7 @@ else
 fi
 
 dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-nmapcmd="sudo nmap -sS -sU -sV -T3 -O -A -vv -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason --script banner,ftp-anon,http-favicon,http-git,http-headers,http-internal-ip-disclosure,http-php-version,http-robots.txt,http-shellshock,http-svn-info,http-waf-fingerprint,resolveall,smb-os-discovery,smb-system-info,snmp-info,sshv1,ssl-heartbleed,telnet-ntlm-info,upnp-info,vnc-info,xmpp-info --script-args http-shellshock.cmd=ls,newtargets,resolveall.hosts=$target,vulns.showall=2 --version-intensity 4 $target"
+nmapcmd="sudo nmap -sSV -sC safe -T3 -O -A -vv -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason $target"
 sslcmd="sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 wpcmd="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-$target.txt --url $target"
 wpcmd2="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-https.$target.txt --url https://$target"
@@ -99,7 +99,7 @@ function 1cmd {
   fi
   if [ $nmap -eq 1 ]
   then
-    echo -en "[+] Running nmap (w\ Shellshock+Heartbleed+ProFTP,VSFTP,DLink,RealVNC Backdoors. MySQL/MSSQL/UPnP/SMB/NTP/VNC Info).\nOutput: $HOME/Scans/nmap-$target.xml\n\n";
+    echo -en "[+] Running nmap...\nOutput: $HOME/Scans/nmap-$target.xml\n\n";
     echo -e  "[+] cmdline: $nmapcmd\n\n";
     $nmapcmd
     echo -en "[+] nmap complete.\n\n";
