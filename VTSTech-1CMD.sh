@@ -1,6 +1,6 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.4 Revision 22
+# Version: 0.0.4 Revision 23
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -10,7 +10,7 @@
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 
-v=0.0.4-r22
+v=0.0.4-r23
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -77,12 +77,12 @@ else
 fi
 
 dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-nmapcmd="nmap -sS -sU -sV -T4 -O -A -v -v -F -n -oX /root/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason --script banner,ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,http-dlink-backdoor,http-favicon,http-git,http-headers,http-internal-ip-disclosure,http-php-version,http-robots.txt,http-shellshock,http-svn-info,http-useragent-tester,http-waf-fingerprint,imap-ntlm-info,jdwp-info,jdwp-version,ms-sql-info,ms-sql-ntlm-info,mysql-info,nbstat,ndmp-fs-info,ndmp-version,ntp-info,realvnc-auth-bypass,resolveall,rpcinfo,smb-os-discovery,smb-system-info,snmp-info,sshv1,ssl-heartbleed,telnet-ntlm-info,upnp-info,vnc-info,xmpp-info --script-args http-shellshock.cmd=ls,newtargets,resolveall.hosts=$target,vulns.showall=2 --version-intensity 4 $target"
+nmapcmd="sudo nmap -sS -sU -sV -T4 -O -A -v -v -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason --script banner,ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,http-dlink-backdoor,http-favicon,http-git,http-headers,http-internal-ip-disclosure,http-php-version,http-robots.txt,http-shellshock,http-svn-info,http-useragent-tester,http-waf-fingerprint,imap-ntlm-info,jdwp-info,jdwp-version,ms-sql-info,ms-sql-ntlm-info,mysql-info,nbstat,ndmp-fs-info,ndmp-version,ntp-info,realvnc-auth-bypass,resolveall,rpcinfo,smb-os-discovery,smb-system-info,snmp-info,sshv1,ssl-heartbleed,telnet-ntlm-info,upnp-info,vnc-info,xmpp-info --script-args http-shellshock.cmd=ls,newtargets,resolveall.hosts=$target,vulns.showall=2 --version-intensity 4 $target"
 sslcmd="sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 wpcmd="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-$target.txt --url $target"
 wpcmd2="wpscan -e vt,vp,tt,u[1-20] -t 2 -v --no-color --batch --log $HOME/Scans/wpscan-https.$target.txt --url https://$target"
 wgetcmd="wget -t 4 --content-on-error http://$target/ -O $HOME/Scans/wget-$target.txt"
-urlcmd="urlscan -c -n wget-$target.txt > $HOME/Scans/urlscan-$target.txt"
+urlcmd="urlscan -c -n $HOME/Scans/wget-$target.txt > $HOME/Scans/urlscan-$target.txt"
 
 
 function 1cmd {
