@@ -1,6 +1,6 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.5 Revision 01
+# Version: 0.0.5 Revision 03
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -10,7 +10,7 @@
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 
-v=0.0.5-r01
+v=0.0.5-r03
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -110,17 +110,17 @@ else
   fi
 fi
 
-dnscmd="dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
+dnscmd="sudo dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
 nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T3 -O -A -vv -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason $target"
-nmap1="sudo nmap -sS --top-ports 10 -T2 -vv -n -oX $HOME/Scans/nmap1-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --reason $target"
-nmap2="sudo nmap -sSV --top-ports 100 -T2 -O -vv -n -oX $HOME/Scans/nmap2-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --reason $target"
-nmap3="sudo nmap -sSV --top-ports 1000 -T3 -O -A -vv -n -oX $HOME/Scans/nmap3-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --reason $target"
-nmap4="sudo nmap -sSUV --top-ports 1000 -T4 -O -A --script safe -vv -n -oX $HOME/Scans/nmap4-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --reason $target"
-nmap5="sudo nmap -sSUV --top-ports 1000 -T4 -O -A --script vulns -vv -n -oX $HOME/Scans/nmap4-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --reason $target"
-sslcmd="sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
-wpcmd="wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
-wgetcmd="wget -t 4 --content-on-error http://$target/ -O $HOME/Scans/wget-$target.txt"
-urlcmd="urlscan -c -n $HOME/Scans/wget-$target.txt"
+nmap1="sudo nmap -Pn --reason -T4 --top-ports 100 -vv -oX $HOME/Scans/nmap1-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+nmap2="sudo nmap -Pn --reason -T4 --top-ports 250 -vv -sS -oX $HOME/Scans/nmap2-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+nmap3="sudo nmap -Pn --reason -T4 --top-ports 500 -vv -sS -O -oX $HOME/Scans/nmap3-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+nmap4="sudo nmap -Pn --reason -T4 --top-ports 750 -vv -sS -O -oX $HOME/Scans/nmap4-$target.xml --script default --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+nmap5="sudo nmap -Pn --reason -T4 --top-ports 1000 -vv -sSU -O -oX $HOME/Scans/nmap5-$target.xml --script=discovery,vuln --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
+wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
+wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
+urlcmd="sudo urlscan -c -n $HOME/Scans/wget-$target.txt"
 
 
 function 1cmd {
@@ -138,7 +138,7 @@ function 1cmd {
   if [ $nmap -eq 1 ] || [ "-n1" != $i ] || [ "-n2" != $i ] || [ "-n3" != $i ] || [ "-n4" != $i ] || [ "-n5" != $i ]
   then
     echo -en "[+] Running nmap...\n\n";
-		  if [ $n1 -eq 1 ]
+		  if [ $n1 -eq 1 ] || [ $nmap -eq 1 ]
 		  then
 		    nst="1"
 		    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
@@ -146,7 +146,7 @@ function 1cmd {
 		    $nmap1
 		    echo -en "[+] nmap stage $nst complete.\n\n";
 		  fi
-		  if [ $n2 -eq 1 ]
+		  if [ $n2 -eq 1 ] || [ $nmap -eq 1 ]
 		  then
 		    nst="2"
 		    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
@@ -154,7 +154,7 @@ function 1cmd {
 		    $nmap2
 		    echo -en "[+] nmap stage $nst complete.\n\n";
 		  fi
-		  if [ $n3 -eq 1 ]
+		  if [ $n3 -eq 1 ] || [ $nmap -eq 1 ]
 		  then
 		    nst="3"
 		    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
@@ -162,7 +162,7 @@ function 1cmd {
 		    $nmap3
 		    echo -en "[+] nmap stage $nst complete.\n\n";
 		  fi
-		  if [ $n4 -eq 1 ]
+		  if [ $n4 -eq 1 ] || [ $nmap -eq 1 ]
 		  then
 		    nst="4"
 		    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
@@ -170,7 +170,7 @@ function 1cmd {
 		    $nmap4
 		    echo -en "[+] nmap stage $nst complete.\n\n";
 		  fi
-		  if [ $n5 -eq 1 ]
+		  if [ $n5 -eq 1 ] || [ $nmap -eq 1 ]
 		  then
 		    nst="5"
 		    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
