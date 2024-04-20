@@ -103,7 +103,7 @@ else
     	  then
     	    tor=1;
     	  fi
-    	  if [ "-n" != $i ] && [ "-d" != $i ] && [ "-u" != $i ] && [ "-s" != $i ] && [ "-wg" != $i ] && [ "-wp" != $i ] && [ "-n1" != $i ] && [ "-n2" != $i ] && [ "-n3" != $i ] && [ "-n4" != $i ] && [ "-n5" != $i ]
+    	  if [ "-n" != $i ] && [ "-d" != $i ] && [ "-u" != $i ] && [ "-s" != $i ] && [ "-wg" != $i ] && [ "-wp" != $i ] && [ "-n1" != $i ] && [ "-n2" != $i ] && [ "-n3" != $i ] && [ "-n4" != $i ] && [ "-n5" != $i ] && [ "-tor" != $i ]
     	  then
     	    target=$i;
     	    echo -e "Target set to $i\n";
@@ -127,6 +127,7 @@ then
 	wpcmd="sudo wpscan --proxy socks5://127.0.0.1:9050 -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="sudo torify wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
 	urlcmd="sudo torify urlscan -c -n $HOME/Scans/wget-$target.txt"
+	#urlcmd2="sudo uniq -u $HOME/Scans/urlscan-$target.txt | sudo tee $HOME/Scans/urlscan-$target.txt"
 else
 	dnscmd="sudo dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
 	#nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T3 -O -A -vv -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason $target"
@@ -139,7 +140,7 @@ else
 	wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
 	urlcmd="sudo urlscan -c -n $HOME/Scans/wget-$target.txt"
-	urlcmd2="sudo uniq -u $HOME/Scans/urlscan-$target.txt | tee $HOME/Scans/urlscan-$target.txt"
+	#urlcmd2="sudo uniq -u $HOME/Scans/urlscan-$target.txt | tee $HOME/Scans/urlscan-$target.txt"
 fi
 
 function 1cmd {
@@ -243,7 +244,7 @@ function 1cmd {
 	echo -en "Running urlscan. Output: $HOME/Scans/urlscan-$target.txt\n\n";
   echo -e "[+] cmdline: $urlcmd\n\n";
   $urlcmd > $HOME/Scans/urlscan-$target.txt
-  #echo -en "Sorting urlscan. ";
+  #echo -en "Sorting urlscan.\n";
   #$urlcmd2
 	fi
   if [ $url -eq 0 ]
