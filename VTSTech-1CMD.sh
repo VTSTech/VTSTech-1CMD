@@ -1,16 +1,16 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.5 Revision 03
+# Version: 0.0.5 Revision 04
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
-# GitHub: https://github.com/Veritas83
+# GitHub: https://github.com/VTSTech
 # Homepage: www.VTS-Tech.org
 # Dependencies: dnsrecon, nmap, sslscan, wpscan, urlscan, wget
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 
 
-v=0.0.5-r03
+v=0.0.5-r04
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -26,8 +26,8 @@ banner+="-n# Use nmap (stage # 1-5)\n"
 banner+="-s Use sslscan\n"
 banner+="-wp Use wpscan\n"
 banner+="-wg Use wget\n"
-banner+="-u Use urlscan\n\n"
-
+banner+="-u Use urlscan\n"
+banner+="-tor Use Tor\n\n"
 #Config
 #Missing required tools? Try this: apt-get install dnsrecon nmap wget wpscan sslscan urlscan
 list="/usr/share/dnsrecon/namelist.txt" #You might want to change this
@@ -43,6 +43,7 @@ wp="0"   #set to 0 to skip wpscan or use -wp
 wg="0"   #set to 0 to skip wget or use -wg
 ssl="0"  #set to 0 to skip sslscan or use -s
 url="0"  #set to 0 to skip urlscan or use -u
+tor="0"  #set to 1 to use tor or use -tor
 #EndConfig
 
 if [ $# -eq 0 ]
@@ -98,6 +99,10 @@ else
     	  then
     	    url=1;
     	  fi
+    	  if [ $i == "-tor" ]
+    	  then
+    	    tor=1;
+    	  fi
     	  if [ "-n" != $i ] && [ "-d" != $i ] && [ "-u" != $i ] && [ "-s" != $i ] && [ "-wg" != $i ] && [ "-wp" != $i ] && [ "-n1" != $i ] && [ "-n2" != $i ] && [ "-n3" != $i ] && [ "-n4" != $i ] && [ "-n5" != $i ]
     	  then
     	    target=$i;
@@ -110,18 +115,32 @@ else
   fi
 fi
 
-dnscmd="sudo dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T3 -O -A -vv -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason $target"
-nmap1="sudo nmap -Pn --reason -T4 --top-ports 100 -vv -oX $HOME/Scans/nmap1-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
-nmap2="sudo nmap -Pn --reason -T4 --top-ports 250 -vv -sS -oX $HOME/Scans/nmap2-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
-nmap3="sudo nmap -Pn --reason -T4 --top-ports 500 -vv -sS -O -oX $HOME/Scans/nmap3-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
-nmap4="sudo nmap -Pn --reason -T4 --top-ports 750 -vv -sS -O -oX $HOME/Scans/nmap4-$target.xml --script default --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
-nmap5="sudo nmap -Pn --reason -T4 --top-ports 1000 -vv -sSU -O -oX $HOME/Scans/nmap5-$target.xml --script=discovery,vuln --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
-sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
-wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
-wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
-urlcmd="sudo urlscan -c -n $HOME/Scans/wget-$target.txt"
-
+if [ $tor -eq 1 ]
+then
+	dnscmd="sudo torify dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
+	nmap1="sudo nmap -Pn --reason -T4 --proxies=socks4://127.0.0.1:9050 --top-ports 25 -vv -sT -O -oX $HOME/Scans/nmap1-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap2="sudo nmap -Pn --reason -T4 --proxies=socks4://127.0.0.1:9050 --top-ports 50 -vv -sT -O -oX $HOME/Scans/nmap2-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap3="sudo nmap -Pn --reason -T4 --proxies=socks4://127.0.0.1:9050 --top-ports 100 -vv -sTV -O -oX $HOME/Scans/nmap3-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap4="sudo nmap -Pn --reason -T4 --proxies=socks4://127.0.0.1:9050 --top-ports 250 -vv -sTV -O -oX $HOME/Scans/nmap4-$target.xml --script default --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap5="sudo nmap -Pn --reason -T4 --proxies=socks4://127.0.0.1:9050 --top-ports 500 -vv -sTUV -O -oX $HOME/Scans/nmap5-$target.xml --script=discovery,vuln --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	sslcmd="sudo torify sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
+	wpcmd="sudo wpscan --proxy socks5://127.0.0.1:9050 -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
+	wgetcmd="sudo torify wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
+	urlcmd="sudo torify urlscan -c -n $HOME/Scans/wget-$target.txt"
+else
+	dnscmd="sudo dnsrecon -t std,srv,zonewalk,brt -n $ns -D $list -z -f --iw --threads 2 --lifetime 10 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
+	#nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T3 -O -A -vv -F -n -oX $HOME/Scans/nmap-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl -Pn --fuzzy --osscan-guess --reason $target"
+	nmap1="sudo nmap -Pn --reason -T4 --top-ports 25 -vv -oX $HOME/Scans/nmap1-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap2="sudo nmap -Pn --reason -T4 --top-ports 50 -vv -sS -oX $HOME/Scans/nmap2-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap3="sudo nmap -Pn --reason -T4 --top-ports 100 -vv -sS -O -oX $HOME/Scans/nmap3-$target.xml --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap4="sudo nmap -Pn --reason -T4 --top-ports 250 -vv -sS -O -oX $HOME/Scans/nmap4-$target.xml --script default --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	nmap5="sudo nmap -Pn --reason -T4 --top-ports 500 -vv -sSU -O -oX $HOME/Scans/nmap5-$target.xml --script=discovery,vuln --stylesheet https://svn.nmap.org/nmap/docs/nmap.xsl $target"
+	sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
+	wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
+	wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
+	urlcmd="sudo urlscan -c -n $HOME/Scans/wget-$target.txt"
+	urlcmd2="sudo uniq -u $HOME/Scans/urlscan-$target.txt | tee $HOME/Scans/urlscan-$target.txt"
+fi
 
 function 1cmd {
   mkdir $HOME/Scans;
@@ -224,6 +243,8 @@ function 1cmd {
 	echo -en "Running urlscan. Output: $HOME/Scans/urlscan-$target.txt\n\n";
   echo -e "[+] cmdline: $urlcmd\n\n";
   $urlcmd > $HOME/Scans/urlscan-$target.txt
+  #echo -en "Sorting urlscan. ";
+  #$urlcmd2
 	fi
   if [ $url -eq 0 ]
   then
