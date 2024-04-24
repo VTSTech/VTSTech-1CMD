@@ -1,16 +1,15 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.5 Revision 06
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
-# Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
+# Author: Written by VTSTech (veritas@vts-tech.org)
 # GitHub: https://github.com/VTSTech
 # Homepage: www.VTS-Tech.org
 # Dependencies: dnsrecon, nmap, sslscan, wpscan, urlscan, wget, amass, proxychains4, tor
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan amass tor proxychains4
 
 
-v=0.0.5-r06
+v=0.0.5-r07
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -30,6 +29,7 @@ banner+="-wg Use wget\n"
 banner+="-u Use urlscan\n"
 banner+="-a Use amass\n"
 banner+="-h Use httpx\n"
+banner+="-t Use target.com\n"
 banner+="-f Use list of targets\n"
 banner+="-tor Use Tor\n\n"
 #Config
@@ -62,7 +62,7 @@ targets=""
 
 if [ $# -eq 0 ]; then
   echo -e $banner
-  echo "Usage: $0 [-d] [-n] [-n1] [-n2] [-n3] [-n4] [-n5] [-wp] [-wg] [-s] [-u] [-tor] [-a] [-h] [-f targets_file]"
+  echo "Usage: $0 [-d] [-n] [-n1] [-n2] [-n3] [-n4] [-n5] [-wp] [-wg] [-s] [-u] [-tor] [-a] [-h] [-t target.com] [-f targets_file]"
   exit 1
 fi
 
@@ -83,6 +83,7 @@ while [[ $# -gt 0 ]]; do
         -tor) tor=1 ;;
         -a) ama=1 ;;
         -h) ht=1 ;;
+        -t) target="$2"; shift ;;        
         -f) targets="$2"; shift ;;
         *) echo "Invalid option: $1" >&2; exit 1 ;;
     esac
@@ -108,11 +109,11 @@ then
 else
 	dnscmd="sudo dnsrecon -v -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
 	#nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T4 -O -A -vv -F -n -oN $HOME/Scans/nmap-$target.txt -Pn --fuzzy --osscan-guess --open $target"
-	nmap1="sudo nmap -Pn --open -T4 --top-ports 25 -vv -sSV -oN $HOME/Scans/nmap1-$target.txt $target"
-	nmap2="sudo nmap -Pn --open -T4 --top-ports 50 -vv -sSV-oN $HOME/Scans/nmap2-$target.txt $target"
-	nmap3="sudo nmap -Pn --open -T4 --top-ports 100 -vv -sSV -O -oN $HOME/Scans/nmap3-$target.txt $target"
-	nmap4="sudo nmap -Pn --open -T4 --top-ports 250 -vv -sSV -O -oN $HOME/Scans/nmap4-$target.xml --script default $target"
-	nmap5="sudo nmap -Pn --open -T4 --top-ports 500 -vv -sSUV -O -oN $HOME/Scans/nmap5-$target.xml --script=discovery,vuln $target"
+	nmap1="nmap -Pn --open -T3 --top-ports 25 -vv -sSV -oN $HOME/Scans/nmap1-$target.txt $target"
+	nmap2="nmap -Pn --open -T3 --top-ports 50 -vv -sSV-oN $HOME/Scans/nmap2-$target.txt $target"
+	nmap3="sudo nmap -Pn --open -T3 --top-ports 100 -vv -sSV -O -oN $HOME/Scans/nmap3-$target.txt $target"
+	nmap4="sudo nmap -Pn --open -T3 --top-ports 250 -vv -sSV -O -oN $HOME/Scans/nmap4-$target.xml --script default $target"
+	nmap5="sudo nmap -Pn --open -T3 --top-ports 500 -vv -sSUV -O -oN $HOME/Scans/nmap5-$target.xml --script=discovery,vuln $target"
 	sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 	wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
@@ -266,7 +267,9 @@ if [ -n "$targets" ]; then
     echo "Error: Targets file '$targets' not found."
   fi
 else
-  echo "Error: No targets file specified using -f option."
+  echo "No targets file specified using -t option."
+  3cmd "$target"
+  2cmd "$target"  
 fi
 
 echo -e "\n\n[*] All Operations completed!\n"
