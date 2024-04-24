@@ -1,6 +1,6 @@
 #!/bin/bash
 # Program: VTSTech-1CMD.sh
-# Version: 0.0.5 Revision 05
+# Version: 0.0.5 Revision 06
 # Operating System: Kali Linux
 # Description: Bash script to run dnsrecon, nmap, sslscan, wpscan, urlscan in 1 command. Output saved per tool/target.
 # Author: Written by Veritas//VTSTech (veritas@vts-tech.org)
@@ -10,15 +10,15 @@
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan amass tor proxychains4
 
 
-v=0.0.5-r05
+v=0.0.5-r06
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
 echo "| |/ / / /  ___/ // / / /___/ /___/ __  /  ";
 echo "|___/ /_/  /____//_/ /_____/\____/_/ /_/   ";
 echo "                                           ";
-echo "VTSTech-1CMD v$v Written by Veritas (veritas@vts-tech.org)"
-banner="VTSTech-1CMD v$v\nWritten by Veritas (veritas@vts-tech.org)\n"
+echo "VTSTech-1CMD v$v https://github.com/VTSTech"
+banner="VTSTech-1CMD v$v\nhttps://github.com/VTSTech\n"
 banner+="Homepage: www.VTS-Tech.org\nRequires: dnsrecon, nmap, wget, wpscan, sslscan, urlscan\n"
 banner+="================================\nUsage: ./VTSTech-1CMD target.com\n\nOptions:\n\n"
 banner+="-d Use dnsrecon\n"
@@ -92,12 +92,12 @@ function 3cmd {
 #local target=$1
 if [ $tor -eq 1 ]
 then
-	dnscmd="proxychains4 dnsrecon -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-	nmap1="sudo nmap -n --dns-servers=$ns --proxies=http://127.0.0.1:8118/ -Pn --open -T2  --top-ports 25 -vv -sTV -oN $HOME/Scans/nmap1-$target.txt $target"
-	nmap2="sudo proxychains4 nmap  -Pn --open -T2 --top-ports 50 -vv -sTV  -oN $HOME/Scans/nmap2-$target.txt $target"
-	nmap3="sudo proxychains4 nmap -Pn --open -T2 --top-ports 100 -vv -sTV -O -oN $HOME/Scans/nmap3-$target.txt $target"
-	nmap4="sudo proxychains4 nmap -Pn --open -T2 --top-ports 250 -vv -sTV -OA -oN $HOME/Scans/nmap4-$target.txt--script default  $target"
-	nmap5="sudo proxychains4 nmap -Pn --open -T2 --top-ports 500 -vv -sTUV -OA -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln $target"
+	dnscmd="proxychains dnsrecon -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
+	nmap1="proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 -p 21,22,23,25,80,110,143,445,993,995,1080,3128,3306,3389,5900,8080 -sTV -oN $HOME/Scans/nmap1-$target.txt $target"
+	nmap2="proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 50 -vv -sTV  -oN $HOME/Scans/nmap2-$target.txt $target"
+	nmap3="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 100 -vv -sTV -O -oN $HOME/Scans/nmap3-$target.txt $target"
+	nmap4="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 250 -vv -sTV -OA -oN $HOME/Scans/nmap4-$target.txt--script default  $target"
+	nmap5="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 500 -vv -sTUV -OA -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln $target"
 	sslcmd="proxychains4 sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 	wpcmd="wpscan --proxy socks5://127.0.0.1:9050 -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="proxychains4 wget -t 4 --content-on-error -O $HOME/Scans/wget-$target.txt https://$target/"
@@ -107,12 +107,12 @@ then
 	htcmd="httpx https://$target --proxy socks5://127.0.0.1:9050 -h User-Agent $ua --download $HOME/Scans/httpx-$target.txt"
 else
 	dnscmd="sudo dnsrecon -v -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-	#nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T2 -O -A -vv -F -n -oN $HOME/Scans/nmap-$target.txt -Pn --fuzzy --osscan-guess --open $target"
-	nmap1="sudo nmap -Pn --open -T2 --top-ports 25 -vv -sSV -oN $HOME/Scans/nmap1-$target.txt $target"
-	nmap2="sudo nmap -Pn --open -T2 --top-ports 50 -vv -sSV-oN $HOME/Scans/nmap2-$target.txt $target"
-	nmap3="sudo nmap -Pn --open -T2 --top-ports 100 -vv -sSV -O -oN $HOME/Scans/nmap3-$target.txt $target"
-	nmap4="sudo nmap -Pn --open -T2 --top-ports 250 -vv -sSV -O -oN $HOME/Scans/nmap4-$target.xml --script default $target"
-	nmap5="sudo nmap -Pn --open -T2 --top-ports 500 -vv -sSUV -O -oN $HOME/Scans/nmap5-$target.xml --script=discovery,vuln $target"
+	#nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T4 -O -A -vv -F -n -oN $HOME/Scans/nmap-$target.txt -Pn --fuzzy --osscan-guess --open $target"
+	nmap1="sudo nmap -Pn --open -T4 --top-ports 25 -vv -sSV -oN $HOME/Scans/nmap1-$target.txt $target"
+	nmap2="sudo nmap -Pn --open -T4 --top-ports 50 -vv -sSV-oN $HOME/Scans/nmap2-$target.txt $target"
+	nmap3="sudo nmap -Pn --open -T4 --top-ports 100 -vv -sSV -O -oN $HOME/Scans/nmap3-$target.txt $target"
+	nmap4="sudo nmap -Pn --open -T4 --top-ports 250 -vv -sSV -O -oN $HOME/Scans/nmap4-$target.xml --script default $target"
+	nmap5="sudo nmap -Pn --open -T4 --top-ports 500 -vv -sSUV -O -oN $HOME/Scans/nmap5-$target.xml --script=discovery,vuln $target"
 	sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 	wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
@@ -136,7 +136,6 @@ function 2cmd {
 	  then
 	    echo -en "[-] Skipping dnsrecon.\n\n";
 	  fi
-	  echo "Debug $n1"
 	  if [ $nmap -eq 1 ] || [ $n1 -eq 1 ] || [ $n2 -eq 1 ] || [ $n3 -eq 1 ] || [ $n4 -eq 1 ] || [ $n5 -eq 1 ]; then
 	    echo -en "[+] Running nmap...\n\n";
 			  if [ $n1 -eq 1 ] || [ $nmap -eq 1 ]
