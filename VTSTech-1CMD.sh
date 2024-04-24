@@ -94,11 +94,11 @@ function 3cmd {
 if [ $tor -eq 1 ]
 then
 	dnscmd="proxychains dnsrecon -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-	nmap1="proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 -p 21,22,23,25,80,110,143,445,993,995,1080,3128,3306,3389,5900,8080 -sTV -oN $HOME/Scans/nmap1-$target.txt $target"
+	nmap1="proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 -p 21,22,23,25,80,110,143,443,445,993,995,1080,3128,3306,3389,5900,8080 -sTV -oN $HOME/Scans/nmap1-$target.txt $target"
 	nmap2="proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 50 -vv -sTV  -oN $HOME/Scans/nmap2-$target.txt $target"
 	nmap3="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 100 -vv -sTV -O -oN $HOME/Scans/nmap3-$target.txt $target"
-	nmap4="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 250 -vv -sTV -OA -oN $HOME/Scans/nmap4-$target.txt--script default  $target"
-	nmap5="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 500 -vv -sTUV -OA -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln $target"
+	nmap4="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 250 -vv -sTV -O -A -oN $HOME/Scans/nmap4-$target.txt--script default  $target"
+	nmap5="sudo proxychains -q nmap -n --dns-servers $ns -Pn --open -T4 --top-ports 500 -vv -sTUV -O -A -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln $target"
 	sslcmd="proxychains4 sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 	wpcmd="wpscan --proxy socks5://127.0.0.1:9050 -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="proxychains4 wget -t 4 --content-on-error -O $HOME/Scans/wget-$target.txt https://$target/"
@@ -109,11 +109,11 @@ then
 else
 	dnscmd="sudo dnsrecon -v -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
 	#nmapcmd="sudo nmap -sSV --script fingerprint-strings,ftp-anon,ftp-syst,http-affiliate-id,http-apache-negotiation,http-apache-server-status,http-bigip-cookie,http-comments-displayer,http-default-accounts,http-enum,http-errors,http-feed,http-generator,http-internal-ip-disclosure,http-passwd,http-robots.txt,https-redirect -T4 -O -A -vv -F -n -oN $HOME/Scans/nmap-$target.txt -Pn --fuzzy --osscan-guess --open $target"
-	nmap1="nmap -Pn --open -T3 --top-ports 25 -vv -sSV -oN $HOME/Scans/nmap1-$target.txt $target"
+	nmap1="nmap -Pn --open -T3 -p 21,22,23,25,80,110,143,443,445,993,995,1080,3128,3306,3389,5900,8080 -vv -sSV -oN $HOME/Scans/nmap1-$target.txt $target"
 	nmap2="nmap -Pn --open -T3 --top-ports 50 -vv -sSV-oN $HOME/Scans/nmap2-$target.txt $target"
 	nmap3="sudo nmap -Pn --open -T3 --top-ports 100 -vv -sSV -O -oN $HOME/Scans/nmap3-$target.txt $target"
-	nmap4="sudo nmap -Pn --open -T3 --top-ports 250 -vv -sSV -O -oN $HOME/Scans/nmap4-$target.txt --script default $target"
-	nmap5="sudo nmap -Pn --open -T3 --top-ports 500 -vv -sSUV -O -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln $target"
+	nmap4="sudo nmap -Pn --open -T3 --top-ports 250 -vv -sSV -O -A -oN $HOME/Scans/nmap4-$target.txt --script default $target"
+	nmap5="sudo nmap -Pn --open -T3 --top-ports 500 -vv -sSUV -O -A -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln $target"
 	sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.txt $target"
 	wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
@@ -257,7 +257,6 @@ function 2cmd {
 mkdir -p "$HOME/Scans"
 
 if [ -n "$targets" ]; then
-  echo "Debug: Targets file set to $targets"
   if [ -f "$targets" ]; then
     while IFS= read -r target; do
       3cmd "$target"
@@ -267,7 +266,7 @@ if [ -n "$targets" ]; then
     echo "Error: Targets file '$targets' not found."
   fi
 else
-  echo "No targets file specified using -t option."
+  echo "[+] No targets file specified using -t option."
   3cmd "$target"
   2cmd "$target"  
 fi
