@@ -7,8 +7,9 @@
 # Homepage: www.VTS-Tech.org
 # Dependencies: dnsrecon, nmap, sslscan, wpscan, urlscan, wget, amass, proxychains4, tor, privoxy
 # apt-get install dnsrecon nmap wget wpscan sslscan urlscan amass proxychains4 tor privoxy
+#To use nmap without root do: sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
 
-v=0.0.5-r08
+v=0.0.5-r09
 echo " _    _________________________________  __";
 echo "| |  / /_  __/ ___/_  __/ ____/ ____/ / / /";
 echo "| | / / / /  \__ \ / / / __/ / /   / /_/ / ";
@@ -18,7 +19,7 @@ echo "                                           ";
 echo "VTSTech-1CMD v$v https://github.com/VTSTech"
 banner="VTSTech-1CMD v$v\nhttps://github.com/VTSTech\n"
 banner+="Homepage: www.VTS-Tech.org\nRequires: dnsrecon, nmap, wget, wpscan, sslscan, urlscan\n"
-banner+="================================\nUsage: ./VTSTech-1CMD target.com\n\nOptions:\n\n"
+banner+="================================\nUsage: ./VTSTech-1CMD -t target.com\n\nOptions:\n\n"
 banner+="-d Use dnsrecon\n"
 banner+="-n Use nmap (all stages)\n"
 banner+="-n# Use nmap (stage # 1-5)\n"
@@ -92,11 +93,11 @@ function 3cmd {
 if [ $tor -eq 1 ]
 then
 	dnscmd="proxychains dnsrecon -t std,zonewalk,crt -n $ns -D $list -z -f --iw --threads 2 --lifetime 12 --xml $HOME/Scans/dnsrecon-$target.xml -d $target"
-	nmap1="proxychains -q nmap --proxies http://127.0.0.1:8118/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 -p 21,22,23,25,80,110,143,443,445,993,995,1080,3128,3306,3389,5900,8080 -sV -oN $HOME/Scans/nmap1-$target.txt --script-args http.useragent=$ua $target"
-	nmap2="proxychains -q nmap --proxies http://127.0.0.1:8118/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 25 -sV -oN $HOME/Scans/nmap2-$target.txt --script-args http.useragent=$ua $target"
-	nmap3="proxychains -q nmap --proxies http://127.0.0.1:8118/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 50 -sV -oN $HOME/Scans/nmap3-$target.txt --script-args http.useragent=$ua $target"
-	nmap4="proxychains -q nmap --proxies http://127.0.0.1:8118/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 75 -sV -A -oN $HOME/Scans/nmap4-$target.txt --script default --script-args http.useragent=$ua- $target"
-	nmap5="proxychains -q nmap --proxies http://127.0.0.1:8118/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 100 -sV  -A -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln --script-args http.useragent=$ua $target"
+	nmap1="proxychains  nmap --proxies socks4://127.0.0.1:9050/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 -p 21,22,23,25,80,110,143,443,445,993,995,1080,3128,3306,3389,5900,8080 -sT -oN $HOME/Scans/nmap1-$target.txt --script-args http.useragent=$ua $target"
+	nmap2="proxychains  nmap --proxies socks4://127.0.0.1:9050/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 25 -sV -oN $HOME/Scans/nmap2-$target.txt --script-args http.useragent=$ua $target"
+	nmap3="proxychains nmap --proxies socks4://127.0.0.1:9050/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 50 -sV -oN $HOME/Scans/nmap3-$target.txt --script-args http.useragent=$ua $target"
+	nmap4="proxychains nmap --proxies socks4://127.0.0.1:9050/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 75 -sV -A -oN $HOME/Scans/nmap4-$target.txt  --script default --script-args http.useragent=$ua- $target"
+	nmap5="proxychains  nmap --proxies socks4://127.0.0.1:9050/ -n --dns-servers $ns -Pn --open -T3 --scan-delay 1 --top-ports 100 -sV  -A -oN $HOME/Scans/nmap5-$target.txt --script=discovery,vuln --script-args http.useragent=$ua $target"
 	sslcmd="proxychains4 sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.xml $target"
 	wpcmd="wpscan --proxy socks5://127.0.0.1:9050 -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="proxychains4 wget -t 4 --content-on-error -O $HOME/Scans/wget-$target.txt https://$target/"
@@ -110,8 +111,8 @@ else
 	nmap1="nmap --dns-servers $ns -Pn --open -T3 -p 21,22,23,25,80,110,143,443,445,993,995,1080,3128,3306,3389,5900,8080 -sSV --script-args http.useragent=$ua -oN $HOME/Scans/nmap1-$target.txt --scan-delay 1 $target"
 	nmap2="nmap --dns-servers $ns -Pn --open -T3 --top-ports 25 -sSV -oN $HOME/Scans/nmap2-$target.txt --script-args http.useragent=$ua --scan-delay 1 $target"
 	nmap3="nmap --dns-servers $ns -Pn --open -T3 --top-ports 50 -sSV -oN $HOME/Scans/nmap3-$target.txt --script-args http.useragent=$ua --scan-delay 1 $target"
-	nmap4="nmap --dns-servers $ns -Pn --open -T3 --top-ports 75 -sSV -oN $HOME/Scans/nmap4-$target.txt -A -sC --script-args http.useragent=$ua --scan-delay 1  $target"
-	nmap5="nmap --dns-servers $ns -Pn --open -T3 --top-ports 100 -sSUV -oN $HOME/Scans/nmap5-$target.txt -A --script=discovery,vuln --script-args http.useragent=$ua --scan-delay 1 $target"
+	nmap4="nmap --dns-servers $ns -Pn --open -T3 --top-ports 75 -sSUV -oN $HOME/Scans/nmap4-$target.txt  -sC --script-args http.useragent=$ua --scan-delay 1  $target"
+	nmap5="nmap --dns-servers $ns -Pn --open -T3 --top-ports 100 -sSUV -oN $HOME/Scans/nmap5-$target.txt  --script=discovery,vuln --script-args http.useragent=$ua --scan-delay 1 $target"
 	sslcmd="sudo sslscan --verbose --no-colour --show-certificate --xml=$HOME/Scans/sslscan-$target.txt $target"
 	wpcmd="sudo wpscan -e p,t,tt,u1-20 -t 2 -v -f cli-no-color -o $HOME/Scans/wpscan-$target.txt --url $target"
 	wgetcmd="sudo wget -t 4 --content-on-error https://$target/ -O $HOME/Scans/wget-$target.txt"
@@ -140,7 +141,7 @@ function 2cmd {
 			  if [ $n1 -eq 1 ] || [ $nmap -eq 1 ]
 			  then
 			    nst="1"
-			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
+			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.txt\n\n";
 			    echo -e  "[+] cmdline: $nmap1\n\n";
 			    eval $nmap1
 			    echo -en "[+] nmap stage $nst complete.\n\n";
@@ -148,7 +149,7 @@ function 2cmd {
 			  if [ $n2 -eq 1 ] || [ $nmap -eq 1 ]
 			  then
 			    nst="2"
-			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
+			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.txt\n\n";
 			    echo -e  "[+] cmdline: $nmap2\n\n";
 			    eval $nmap2
 			    echo -en "[+] nmap stage $nst complete.\n\n";
@@ -156,7 +157,7 @@ function 2cmd {
 			  if [ $n3 -eq 1 ] || [ $nmap -eq 1 ]
 			  then
 			    nst="3"
-			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
+			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.txt\n\n";
 			    echo -e  "[+] cmdline: $nmap3\n\n";
 			    eval $nmap3
 			    echo -en "[+] nmap stage $nst complete.\n\n";
@@ -164,7 +165,7 @@ function 2cmd {
 			  if [ $n4 -eq 1 ] || [ $nmap -eq 1 ]
 			  then
 			    nst="4"
-			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
+			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.txt\n\n";
 			    echo -e  "[+] cmdline: $nmap4\n\n";
 			    eval $nmap4
 			    echo -en "[+] nmap stage $nst complete.\n\n";
@@ -172,7 +173,7 @@ function 2cmd {
 			  if [ $n5 -eq 1 ] || [ $nmap -eq 1 ]
 			  then
 			    nst="5"
-			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.xml\n\n";
+			    echo -en "[+] Running nmap stage $nst...\nOutput: $HOME/Scans/nmap$nst-$target.txt\n\n";
 			    echo -e  "[+] cmdline: $nmap5\n\n";
 			    eval $nmap5
 			    echo -en "[+] nmap stage $nst complete.\n\n";
